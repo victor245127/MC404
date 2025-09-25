@@ -1,0 +1,39 @@
+tipo R:
+31-25 funct7 
+24-20 rs2
+19-15 rs1
+14-12 funct3
+11-7 rd
+
+tipo I:
+31-20 imm
+19-15 rs1
+14-12 funct3
+11-7 rd
+
+tipo S:
+31-25 imm[11:5]
+24-20 rs2
+19-15 rs1
+14-12 funct3
+11-7 imm[4:0]
+
+tipo B:
+31 imm[12]
+30-25 imm[10:5]
+24-20 rs2
+19-15 rs1
+14-12 funct3
+11-8 imm[4:1]
+7 imm[11]
+
+tipo U:
+31-12 imm
+11-7 rd
+
+tipo J:
+31 imm[20]
+30-21 imm[10:1]
+20 imm[11]
+19-12 imm[19:12]
+11-7 rd

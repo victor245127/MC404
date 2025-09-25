@@ -1,0 +1,12 @@
+Ta - s0
+Tb - s1
+Tc - s2
+Tr - s3
+Da - s4
+Db - s5
+Dc - s6
+Y - s7
+X - s8
+Yb - s9
+Xc - s10
+write-stdin input

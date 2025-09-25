@@ -1,0 +1,7 @@
+p1 = d1d2d4 = d1^d2^d4 = 1 se for qntd impar de 1s
+p2 = d1d3d4 = d1^d3^d4
+p3 = d2d3d4 = d2^d3^d4
+
+p1p2d1p3d2d3d4 = encoded
+d1d2d3d4 = decoded
+
