@@ -28,17 +28,19 @@ close:
 setCanvasSize:
     la a1, buffer
     call parse_int
-    mv a2, a1 # passa o buffer no estado atual (na posição do primeiro pixel) para a2
+    mv a3, a1 # passa o buffer no estado atual (na posição do primeiro pixel) para a3
     mv a0, s2 # largura
     mv a1, s3 # altura
     li a7, 2201 # syscall para definir tamanho do canvas
     ecall
-montar_imagem:
 
+montar_imagem:
+    call pixel_by_pixel
 end:
     li a0, 0
     li a1, 93
     ecall # syscall exit
+
 
 
 parse_int:
@@ -83,14 +85,40 @@ altura:
     ret
 
 pixel_by_pixel:
-    li t0, 0 # y
-    mv t2, a2 # buffer em t2
-    li t3, 255 # alpha
-1: # loop y da função
-    li t1, 0 # x
-2: # loop x da função
-    mul t4, t0, s2 # t4 = y * largura (linha atual)
-    add t4, t4, t1
+    li a1, 0 # y
+    li t0, 10 # '\n'
+    mv a5, s2 # copia largura para a5
+    mv a6, s3 # copia altura para a6
+    li a4, 255 # alpha
+1: # loop de y
+    li a0, 0 # x
+    jal t6, verifica_enter # pula pra verifica_enter
+2: # loop de x
+    lbu t2, 0(a3) # carrega byte de (x,y) 
+    slli t3, t2, 24 # R
+    slli t4, t2, 16 # G
+    slli t5, t2, 8 # B
+    or a2, t3, t4 # R | G
+    or a2, a2, t5 # R | G | B
+    or a2, a2, a4 # R | G | B | A
+    li a7, 2200 # syscall setPixel
+    ecall
+    addi a0, a0, 1 # x++
+    addi a3, a3, 1 # anda uma posicao no buffer
+    blt a0, a5, 2b # x < largura volta pro loop x
+    addi a1, a1, 1 # y++
+    blt a1, a6, 1b # y < altura volta pro loop
+verifica_enter:
+    lbu t2, 0(a3) # carrega byte em t2
+    bne t2, t0, 2b # caso byte != '\n', vai pro loop de x
+    addi a3, a3, 1 # anda para pular o '\n'
+    jalr x0, t6, 0 # retorna para loop de x
+return:
+    ret
+    
+
+    
+    
 
 
 

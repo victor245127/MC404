@@ -3,8 +3,6 @@ Repositório destinado à MC404, aprendizado em RISC-V, durante o segundo semest
 Lab 1a:
 
 Pontos a serem feitos:
-Configurar canvas
-setPixel
+setScalling precisa no assistant?
+tamanho errado do canvas, talvez parse_int errado
 
-Melhorias:
-talvez o parse_int leia um inteiro nos comentarios em algum caso, resolver isso possivelmente no futuro.
