@@ -1,0 +1,10 @@
+Repositório destinado à MC404, aprendizado em RISC-V, durante o segundo semestre de 2025.
+
+Lab 1a:
+
+Pontos a serem feitos:
+Configurar canvas
+setPixel
+
+Melhorias:
+talvez o parse_int leia um inteiro nos comentarios em algum caso, resolver isso possivelmente no futuro.
