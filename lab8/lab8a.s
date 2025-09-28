@@ -14,6 +14,7 @@ _start:
     ecall
     mv s0, a0 # fd do arquivo
 
+    mv a0, s0
     la a1, buffer
     li a2, 262400 # max de bytes a serem lidos
     li a7, 63
@@ -21,7 +22,7 @@ _start:
     mv s1, a0 # numero de bytes lidos salvo
 
 close:
-    mv a0, s0
+    li a0, 3
     li a7, 57
     ecall # syscall close pra fechar o arquivo
 
@@ -52,22 +53,8 @@ parse_int:
     li t3, 10
     li t5, 20 # ' '
 
-1: # verifica se caractere é numerico ou nao
-    lbu t0, 0(a1) # carrega byte de a1
-    li t1, 48 # '0'
-    li t2, 58 # ':', depois de '9'
-    blt t0, t1, 2f # se byte for < '0'
-    bge t0, t2, 2f # se byte >= ':'
-    j 1f
-2:
-    addi a1, a1, 1 # anda no buffer
-    j 1b
-
 1:
     lbu t0, 0(a1) # caractere
-    blt t0, t1, 1b # se < '0'
-    bge t0, t2, 1b # se >= ':'
-
     addi t0, t0, -48 # numero
     mul a0, a0, t3 # multiplica valor anterior por 10
     add a0, a0, t0 # adiciona digito
@@ -85,6 +72,7 @@ parse_int:
 
 3:
     mv s3, a0 # salva altura
+    addi a1, a1, 5 # pula '255\n'
     ret
 
 
@@ -101,6 +89,7 @@ pixel_by_pixel:
     add t0, t0, a0  # t0 + x
     add t1, s4, t0 # endereço do pixel em t1 (posição inicial + offset)
     lbu t2, 0(t1) # carrega byte de (x,y) 
+
     slli t3, t2, 24 # R
     slli t4, t2, 16 # G
     slli t5, t2, 8 # B
