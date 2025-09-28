@@ -3,6 +3,4 @@ Repositório destinado à MC404, aprendizado em RISC-V, durante o segundo semest
 Lab 1a:
 
 Pontos a serem feitos:
-setScalling precisa no assistant?
-tamanho errado do canvas, talvez parse_int errado
-
+Loop infinito no parse
