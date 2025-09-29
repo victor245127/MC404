@@ -5,44 +5,6 @@ buffer: .space 262160
 .text
 .globl _start
 
-_start:
-    la a0, input_file
-    li a1, 0
-    li a2, 0
-    li a7, 1024 # syscall open
-    ecall
-    mv s0, a0
-
-    mv a0, s0
-    la a1, buffer
-    li a2, 262160
-    li a7, 63 # syscall read
-    ecall
-    mv s1, a0 # tamanho lido
-
-setCanvasSize:
-    la a1, buffer
-    call parse_int
-
-    mv a0, s2
-    mv a1, s3 
-    li a7, 2201 # syscall setCanvasSize
-    ecall 
-
-montar_imagem:
-    call pixel_by_pixel
-
-end:
-    mv a0, s0
-    li a7, 57 # syscall close
-    ecall
-
-    li a0, 0
-    li a7, 93 # syscall exit
-    ecall
-
-
-
 parse_int:
     mv t6, a1
     addi t6, t6, 3 # pula 'P5\n'
@@ -50,8 +12,6 @@ parse_int:
     li s2, 0
     li t0, 35 # '#'
     li t1, 10
-    li t3, 48 # '0'
-    li t5, 58 # ':'
     lbu t2, 0(t6)
     beq t2, t0, 1f # se caractere for #, pula ate o fim dos comentarios
     j 2f
@@ -69,6 +29,8 @@ parse_int:
     add a0, a0, t2 # soma
     addi t6, t6, 1
 
+    li t3, 48 # '0'
+    li t5, 58 # ':'
     lbu t4, 0(t6)
     blt t4, t3, 3f # se prox caractere < '0', salva numero
     bge t4, t5, 3f # se >= ':', salva numero
@@ -122,3 +84,39 @@ return:
     ret
 
 
+
+_start:
+    la a0, input_file
+    li a1, 0
+    li a2, 0
+    li a7, 1024 # syscall open
+    ecall
+    mv s0, a0
+
+    mv a0, s0
+    la a1, buffer
+    li a2, 262160
+    li a7, 63 # syscall read
+    ecall
+    mv s1, a0 # tamanho lido
+
+setCanvasSize:
+    la a1, buffer
+    call parse_int
+
+    mv a0, s2
+    mv a1, s3 
+    li a7, 2201 # syscall setCanvasSize
+    ecall 
+
+montar_imagem:
+    call pixel_by_pixel
+
+end:
+    li a0, 3
+    li a7, 57 # syscall close
+    ecall
+
+    li a7, 93 # syscall exit
+    li a0, 0
+    ecall
