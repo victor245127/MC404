@@ -15,3 +15,10 @@ O parsing de dígitos para quando encontra um não-dígito.
 O parsing de Altura e MaxVal ocorre de forma sequencial, tratando os separadores corretamente.
 
 O ponteiro s4 é salvo apenas após o MaxVal e todos os whitespaces subsequentes terem sido pulados.
+
+
+
+
+
+Lab 9:
+Funciona para casos que nao acha indice
