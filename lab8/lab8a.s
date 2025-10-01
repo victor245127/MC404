@@ -27,6 +27,7 @@ parse_int:
 2:
     bne s2, x0, 3f # se s2 nao for 0, salva altura
     mv s2, a0 # salva largura em s2
+    li a0, 0 # zera a0
     addi t6, t6, 1 # anda no buffer
     j 1b
 
@@ -48,7 +49,7 @@ pixel_by_pixel:
     mul t0, a1, s2 # offset de (x,y), y * largura 
     add t0, t0, a0  # t0 + x
     add t1, s4, t0 # endereço do pixel em t1 (posição inicial + offset)
-    lb t2, 0(t1) # carrega byte de (x,y) 
+    lbu t2, 0(t1) # carrega byte de (x,y) 
 
     slli t3, t2, 24 # R
     slli t4, t2, 16 # G
@@ -84,7 +85,10 @@ _start:
     li a2, 262160
     li a7, 63 # syscall read
     ecall
-    mv s1, a0 # tamanho lido
+
+    mv a0, s0
+    li a7, 57 # syscall close
+    ecall
 
 setCanvasSize:
     la a1, buffer
@@ -99,10 +103,6 @@ montar_imagem:
     call pixel_by_pixel
 
 end:
-    li a0, 3
-    li a7, 57 # syscall close
-    ecall
-
     li a7, 93 # syscall exit
     li a0, 0
     ecall
