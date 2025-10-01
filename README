@@ -2,25 +2,3 @@ Repositório destinado à MC404, aprendizado em RISC-V, durante o segundo semest
 
 Lab 1a:
 
-Melhore o Loop de Dígitos (Rótulo 2:): O loop deve incluir a verificação se o caractere atual é um dígito antes de realizar o cálculo (a0 * 10) + t2. Se não for, ele deve saltar para a lógica de separação/salvamento do número.
-
-Unifique o Parsing de Separadores: Crie uma rotina para pular todos os caracteres de whitespace e comentários após salvar um número, e antes de tentar ler o próximo.
-
-Implemente a Leitura do MaxVal: Não pule o MaxVal com um valor fixo. Use sua própria rotina de parsing para lê-lo e descartá-lo, garantindo que o ponteiro t6 (e, consequentemente, s4) aponte exatamente para o primeiro byte de pixel binário.
-
-Se você conseguir garantir que:
-
-O parsing de dígitos para quando encontra um não-dígito.
-
-O parsing de Altura e MaxVal ocorre de forma sequencial, tratando os separadores corretamente.
-
-O ponteiro s4 é salvo apenas após o MaxVal e todos os whitespaces subsequentes terem sido pulados.
-
-
-
-
-
-Lab 9:
-Funciona para casos que nao acha indice
-
-Parsing_int aparentemente funcionando

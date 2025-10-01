@@ -19,7 +19,8 @@ parsing_int:
     j 2f
 
 1:
-    addi t3, t3, -2 # multiplicara o numero por -1 no final
+    li t3, -1 # multiplicara o numero por -1 no final
+    addi t0, t0, -1 # pula o '-' na quantidade de digitos lidos
     addi t6, t6, 1 # pula o '-'
 
 2:
@@ -47,6 +48,7 @@ parsing_ascii:
     blt s3, t2, 2f # se indice for menor que 10, sera apenas 1 digito
     blt s3, t1, 3f # se indice for menor que 100, sera apenas 2 digitos
     li t4, 3 # se indice > 100, nao pode ser >= 1000
+    mv t3, t1
     j 4f
     
 1: 
@@ -67,11 +69,12 @@ parsing_ascii:
     li t4, 2
 
 4:
-    div a0, s4, t3 # num / div inicial
-    rem a2, s4, t3 # resto da divisao
-    addi a2, a2, 48 # ascii
-    sb t2, 0(t0) # armazena digito no buffer
-    addi t0, t0, 1
+    div a0, s3, t3 # num / div inicial
+    rem s3, s3, t3 # resto da divisao
+    addi a0, a0, 48 # ascii
+    sb a0, 0(t0) # armazena digito no buffer
+    div t3, t3, t2 # pega a proxima casa decimal
+    addi t0, t0, 1 # anda no buffer
     addi t4, t4, -1 # i--
     blt x0, t4, 4b # t4 > 0
     sb t2, 0(t0) # '\n' no final
@@ -82,19 +85,21 @@ parsing_ascii:
 
 percorrendo_lista:
     la a0, head_node # carrega cabeca da lista em a0
+    mv t0, a0
     li s3, -1 # inicialmente output é -1 e continuara caso nao ache a soma
     li t1, 0 # indice inicial da lista
 
 1:
-    lw a1, 0(a0) # primeiro numero da soma
-    lw a2, 4(a0) # segundo numero da soma
-    lw t2, 8(a0) # ponteiro para o proximo no
-    add a3, a1, a2 
+    lw a1, 0(t0) # primeiro numero da soma
+    lw a2, 4(t0) # segundo numero da soma
+    lw t2, 8(t0) # proximo no
+    add a3, a1, a2 # soma
     beq s1, a3, 2f # se o input for igual a soma, retorna o indice
-    beq t2, x0, 3f # caso proximo nó seja 0 e nao tiver achado a soma, retorna -1
 
-    addi a0, a0, 8 # pula para o primeiro numero do proximo no
+    mv t0, t2
     addi t1, t1, 1 # vai pra proximo indice
+    
+    beq t0, x0, 3f # caso proximo nó seja 0 e nao tiver achado a soma, retorna -1
     j 1b
 
 2:
@@ -123,7 +128,7 @@ _start:
     mv a0, s0
     la a1, buffer
     call parsing_int
-    mv s1, a0 # soma em s1
+    mv s1, a0
 
     call percorrendo_lista
 
