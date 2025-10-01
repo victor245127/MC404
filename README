@@ -22,3 +22,5 @@ O ponteiro s4 é salvo apenas após o MaxVal e todos os whitespaces subsequentes
 
 Lab 9:
 Funciona para casos que nao acha indice
+
+Parsing_int aparentemente funcionando

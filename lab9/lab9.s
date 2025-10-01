@@ -28,8 +28,8 @@ parsing_int:
     mul a0, a0, t4 
     add a0, a0, t2
 
-    addi t6, t6, 1
-    addi t0, t0, -1
+    addi t6, t6, 1 # anda no buffer
+    addi t0, t0, -1 # i--
     blt x0, t0, 2b
     mul a0, a0, t3 # multiplica por +/-1 dependendo do sinal
 
@@ -93,7 +93,7 @@ percorrendo_lista:
     beq s1, a3, 2f # se o input for igual a soma, retorna o indice
     beq t2, x0, 3f # caso proximo nó seja 0 e nao tiver achado a soma, retorna -1
 
-    addi a0, a0, 12 # pula para o primeiro numero do proximo no
+    addi a0, a0, 8 # pula para o primeiro numero do proximo no
     addi t1, t1, 1 # vai pra proximo indice
     j 1b
 
