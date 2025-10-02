@@ -2,3 +2,12 @@ Repositório destinado à MC404, aprendizado em RISC-V, durante o segundo semest
 
 Lab 1a:
 
+Aplicacao do filtro:
+em x = 0 e x = largura-1 vira 0
+em y = 0 e y = altura-1 vira 0
+se kernel passar de 255, transforma em 255, se passar de 0, transforma em 0
+
+posicao 0: offset - largura - 1
+
+ta saindo tudo branco, verificar isso
+de resto tudo certo
