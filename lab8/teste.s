@@ -1,5 +1,6 @@
 .data
 input_file: .asciz "image.pgm"
+w_matrix: .space 9
 buffer: .space 262160
 
 .text
@@ -45,85 +46,62 @@ pixel_by_pixel:
 1: # loop de y
     li a0, 0 # x
     li t2, 0 # sempre que x for 0, o pixel vai ser 0 (bordas)
-    j 6f
+    j 4f
 
 2: # loop de x
     li t2, 0 # kernel inicial
     
     addi t0, s2, -1 # largura -1
-    beq a0, t0, 6f # se x = largura-1, é borda
+    beq a0, t0, 4f # se x = largura-1, é borda
 
     addi t0, s3, -1 # altura -1
-    beq a1, x0, 6f # se y = 0, é borda
-    beq a1, t0, 6f # se y = altura-1, é borda  
+    beq a1, x0, 4f # se y = 0, é borda
+    beq a1, t0, 4f # se y = altura-1, é borda  
 
+    mv a3, s1 # copia inicio da matriz w para a3
     mul t0, a1, s2 # offset de (x,y), y * largura 
     add t0, t0, a0  # t0 + x
     add t1, s4, t0 # endereço do pixel em t1 (posição inicial + offset)
 
-    li t3, -1
-    li s11, 8 
+    sub t3, t1, s2 # posicoes acima do pixel atual
+    li a7, 2
+    li t4, -1
+    jal s11, 3f
 
-    sub t4, t1, s2 # posicoes de cima
-    addi t4, t4, -1 # posicao 0
-    lbu t5, 0(t4)
-    mul t5, t5, t3 # vezes -1
-    add t2, t2, t5 # soma no kernel
+    mv t3, t1 # linha atual 
+    li a7, -2
+    li t4, -1
+    jal s11, 3f
 
-    addi t4, t4, 1 # posicoes de cima, posicao 1
-    lbu t5, 0(t4)
-    mul t5, t5, t3 # vezes -1
-    add t2, t2, t5 # soma no kernel
+    add t3, t1, s2 # posicoes abaixo do pixel atual
+    li a7, -2
+    li t4, -1
+    jal s11, 3f
 
-    addi t4, t4, 1 # posicoes de cima, posicao 2
-    lbu t5, 0(t4)
-    mul t5, t5, t3 # vezes -1
-    add t2, t2, t5 # soma no kernel
+    blt a4, t2, max
+    blt t2, x0, min
+    j 4f
 
-    addi t4, t1, -1 # posicao 3, meio
-    lbu t5, 0(t4)
-    mul t5, t5, t3 # vezes -1
-    add t2, t2, t5 # soma no kernel
+3:
+    add t5, t3, t4 # posicao atual da matriz
+    lbu t6, 0(t5) # byte da matriz
+    lb a5, 0(a3) # w[k]
+    mul a6, t6, a5 # byte * w[k]
+    add t2, t2, a6 # soma com numero anterior
 
-    addi t4, t4, 1 # posicao 4, centro da matriz
-    lbu t5, 0(t4)
-    mul t5, t5, s11 # vezes 8
-    add t2, t2, t5 # soma no kernel
+    addi a3, a3, 1 # anda na matriz w
+    addi t4, t4, 1 # anda na matriz Mout
+    blt t4, a7, 3b # t4 < 2 volta no loop
+    jalr x0, s11, 0
 
-    addi t4, t4, 1 # posicao 5, meio
-    lbu t5, 0(t4)
-    mul t5, t5, t3 # vezes -1
-    add t2, t2, t5 # soma no kernel
-
-    add t4, t1, s2 # posicao 6, abaixo do meio
-    addi t4, t4, -1
-    lbu t5, 0(t4)
-    mul t5, t5, t3 # vezes -1
-    add t2, t2, t5 # soma no kernel
-
-    addi t4, t4, 1 # posicao 7, abaixo do meio
-    lbu t5, 0(t4)
-    mul t5, t5, t3 # vezes -1
-    add t2, t2, t5 # soma no kernel
-
-    addi t4, t4, 1 # posicao 8, abaixo do meio
-    lbu t5, 0(t4)
-    mul t5, t5, t3 # vezes -1
-    add t2, t2, t5 # soma no kernel
-
-3: 
-    blt a4, t2, 4f # se kernel > 255, vira 255
-    blt t2, x0, 5f # se kernel < 0, vira 0
-    j 6f
-
-4:
+max:
     li t2, 255
-    j 6f
+    j 4f
 
-5: 
+min:
     li t2, 0
 
-6:
+4:
     slli t3, t2, 24 # R
     slli t4, t2, 16 # G
     slli t5, t2, 8 # B
@@ -143,6 +121,35 @@ pixel_by_pixel:
 
 return:
     ret
+
+
+
+set_w:
+    la s1, w_matrix # matriz w ficara em s1
+    mv t3, s1 # copia matriz para t3
+    li t0, 9 # quantidade de iteracoes
+    li t1, -1
+    li t2, 8
+    li t4, 5 # onde vai estar o 8
+
+1:
+    jal a0, 3f # salta pra condicional
+2:
+
+    sb t1, 0(t3) # salva -1 nas posicoes
+    addi t3, t3, 1 # anda na matriz
+    addi t0, t0, -1 # i--
+    blt x0, t0, 1b # t0 > 0
+    j 4f
+
+3:
+    bne t0, t4, 2b # verifica se posicao for central, se nao, volta pro loop
+    sb t2, 0(t3) # salva 8 no centro
+    jalr x0, a0, 0
+
+4:
+    ret
+
 
 
 _start:
@@ -173,6 +180,8 @@ setCanvasSize:
     ecall 
 
 montar_imagem:
+    call set_w
+
     call pixel_by_pixel
 
 end:
