@@ -40,11 +40,13 @@ linked_list_search:
 
 
 atoi:
-    mv t6, a0
+    addi sp, sp, -16
+    sw ra, 0(sp)
+
+    mv t6, a0 # str em t6
     li a0, 0
     li t4, 10 
 
-    addi t0, s0, -1 # quantidade de digitos lidos sem o \n
     li t1, 45 # '-'
     li t3, 1 
     lb t2, 0(t6)
@@ -53,21 +55,22 @@ atoi:
 
 1:
     li t3, -1 # multiplicara o numero por -1 no final
-    addi t0, t0, -1 # pula o '-' na quantidade de digitos lidos
     addi t6, t6, 1 # pula o '-'
 
 2:
-    lb t2, 0(t6)
+    lb t2, 0(t6) 
+    beq x0, t2, 3f # se caractere = '\0', acaba loop
     addi t2, t2, -48
     mul a0, a0, t4 
     add a0, a0, t2
 
     addi t6, t6, 1 # anda no buffer
-    addi t0, t0, -1 # i--
-    blt x0, t0, 2b
-    mul a0, a0, t3 # multiplica por +/-1 dependendo do sinal
+    j 2b
 
 3:
+    mul a0, a0, t3 # multiplica por +/-1 dependendo do sinal
+    lw ra, 0(sp)
+    addi sp, sp, 16
     ret
 
 
@@ -75,61 +78,47 @@ itoa:
     addi sp, sp, -16
     sw ra, 0(sp)
 
-    mv t0, a1 # str em t0
-    mv t1, a2 # base em t1
+    mv t0, a0 # valor em t0
+    mv t1, a1 # str em t1
+    mv t2, a2 # base em t2
 
-    mul t2, t1, t1 # base²
+    li t3, 1 # divisor inicial
+    li t4, 0 # contagem de digitos
 
-    mv t5, a0 # val em t5
-    blt t5, x0, 1f # se nao houver indice, sera -1
-    blt t5, t1, 2f # se indice for menor que 10/16, sera apenas 1 digito
-    blt t5, t2, 3f # se indice for menor que 100/256, sera apenas 2 digitos
-    li t4, 3 # se indice > 100, nao pode ser >= 1000
-    mv t3, t2
-    j 4f
-    
-1: 
-    li t1, 45 # '-'
-    li t3, 49 # '1'
-    sb t1, 0(t0) # '-1\0'
-    sb t3, 1(t0)
-    sb x0, 2(t0)
-    j 5f
+1: # do-while
+    mul t3, t3, t2 # se nao, divisor inicial aumenta
+    addi t4, t4, 1
+
+    blt t0, t3, 2f # se numero < base^x, pula pro loop
+    j 1b
 
 2:
-    li t3, 1 # divisor inicial sendo 1
-    li t4, 1
+    div t3, t3, t2 # pega a casa decimal certa
+    div a0, t0, t3 # num / div inicial
+    rem t0, t0, t3 # resto da divisao
+    jal adicao
+    addi a0, a0, 48 # ascii
+    sb a0, 0(t1) # armazena digito no buffer
+
+    addi t1, t1, 1 # anda no buffer
+    addi t4, t4, -1 # i--
+    blt x0, t4, 2b # t4 > 0
+    sb x0, 0(t0) # '\0' no final
     j 4f
 
+adicao:
+    li t6, 9
+    blt t6, a0, 4f # verifica se digito for maior que 9
+    jalr x0, ra, 0 # se nao, volta pra adicionar 48
+
 3:
-    mv t3, t1 # divisor inicial sendo 10
-    li t4, 2
+    addi a0, a0, 55 # adiciona 55 (pra letras maiusculas)
+    jalr x0, ra, 4 # retorna pra instrucao seguinte a adicionar 48
 
 4:
-    div a0, t5, t3 # num / div inicial
-    rem t5, t5, t3 # resto da divisao
-    jal a7, adicao
-    addi a0, a0, 48 # ascii
-    sb a0, 0(t0) # armazena digito no buffer
-    div t3, t3, t1 # pega a proxima casa decimal
-    addi t0, t0, 1 # anda no buffer
-    addi t4, t4, -1 # i--
-    blt x0, t4, 4b # t4 > 0
-    sb x0, 0(t0) # '\0' no final
-
-adicao:
-    li t6, 9 
-    blt t6, a0, 6f # verifica se digito for maior que 9
-    jalr a7, x0, 0 # se nao, volta pra adicionar 48
-
-6:
-    addi a0, a0, 87 # adiciona 87 (pra letras minusculas)
-    jalr a7, x0, 4 # retorna pra instrucao seguinte a adicionar 48
-
-5:
+    mv a0, a1 # retorna a string
     lw ra, 0(sp)
     addi sp, sp, 16
-    mv a0, a1 # retorna a string
     ret
 
 
@@ -142,9 +131,17 @@ gets:
     li a2, 100 # numero maximo de bytes
     li a7, 63 # syscall read 
     ecall 
-    mv s0, a0 # salva numero de bytes escritos
 
-    add t0, a1, s0 # chega na ultima posicao da string
+    add t0, a1, a0 # chega na ultima posicao da string
+    beq x0, a0, 1f # se bytes lidos = 0, pula
+
+    li t1, 10 # '\n'
+    addi t0, t0, -1
+    lb t2, 0(t0) # caractere final
+    beq t1, t2, 1f # caso caractere final seja \n, pula
+    addi t0, t0, 1
+
+1:
     sb x0, 0(t0) # '\0' no final da string
 
     mv a0, a1
@@ -158,7 +155,7 @@ puts:
     addi sp, sp, -16
     sw ra, 0(sp)
 
-    li t0, 0
+    li t0, 1
     mv t1, a0 # str em t1
 
 contagem:
@@ -169,6 +166,9 @@ contagem:
     j contagem
 
 1:
+
+    li t2, 10 # '\n'
+    sb t2, 0(t1) # salva \n no final da string
     mv a1, a0 # str em a1
     li a0, 1 # fd = 1
     mv a2, t0 # qntd de bytes escritos
