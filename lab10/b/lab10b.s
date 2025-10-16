@@ -1,8 +1,5 @@
-.bss
-buf: .skip 100
-
 .text
-.globl linked_list_search
+.globl recursive_tree_search
 .globl puts
 .globl gets
 .globl atoi
@@ -11,41 +8,49 @@ buf: .skip 100
 
 
 
-linked_list_search:
+recursive_tree_search:
     addi sp, sp, -16
     sw ra, 0(sp)
 
     mv t0, a0 # nó em t0
-    li t1, -1 # output inicial de -1 (caso nao ache a soma)
-    li t2, 0 # indice inicial
+    li a0, 1 # profundidade
 
 1:
-    lw t3, 0(t0) # val1
-    lw t4, 4(t0) # val2
-    lw t5, 8(t0) # *prox no
-    add t6, t3, t4 # soma
-    beq a1, t6, 3f # se input = soma, retorna o indice
+    lw t1, 0(t0) # val
 
-    mv t0, t5
-    addi t2, t2, 1 # prox indice
+    beq t1, a1, final # input = val
 
-    beq t0, x0, 2f # caso proximo no seja 0 e nao tiver achado a soma, retorna -1
-    j 1b
+    lw t2, 4(t0) # left
+    lw t3, 8(t0) # right
 
-2:
-    mv t2, t1 # output -1
+    beq t2, x0, right # left = 0, vai pra direita
+    mv t3, t0 # salva estado atual de t0
+    jal left
 
-3:
-    mv a0, t2
-    lw ra, 0(sp)
-    addi sp, sp, 16
-    ret
+left:
+    lw t2, 4(t0)
+    addi a0, a0, 1 # profundidade ++
 
+    beq t2, x0, right # left = 0
+    beq t2, a1, final # input = val
+
+    mv t0, t2 # desce na arvore
+    j left 
+
+right:
+    lw t2, 8(t0)
+    addi a0, a0, 1
+
+    beq t2, x0, 1b
+    beq t2, a1, final
+
+    mv t0, t2
+    j left
 
 
 atoi:
     mv t6, a0 # str em t6
-    li t5, 0
+    li a0, 0
     li t4, 10 
 
     li t1, 45 # '-'
@@ -62,15 +67,14 @@ atoi:
     lb t2, 0(t6) 
     beq x0, t2, 3f # se caractere = '\0', acaba loop
     addi t2, t2, -48
-    mul t5, t5, t4 
-    add t5, t5, t2
+    mul a0, a0, t4 
+    add a0, a0, t2
 
     addi t6, t6, 1 # anda no buffer
     j 2b
 
 3:
-    mul t5, t5, t3 # multiplica por +/-1 dependendo do sinal
-    mv a0, t5
+    mul a0, a0, t3 # multiplica por +/-1 dependendo do sinal
     ret
 
 
@@ -94,11 +98,11 @@ itoa:
 
 2:
     div t3, t3, t2 # pega a casa decimal certa
-    div t5, t0, t3 # num / div inicial
+    div a0, t0, t3 # num / div inicial
     rem t0, t0, t3 # resto da divisao
     jal adicao
-    addi t5, t5, 48 # ascii
-    sb t5, 0(t1) # armazena digito no buffer
+    addi a0, a0, 48 # ascii
+    sb a0, 0(t1) # armazena digito no buffer
 
     addi t1, t1, 1 # anda no buffer
     addi t4, t4, -1 # i--
@@ -108,11 +112,11 @@ itoa:
 
 adicao:
     li t6, 9
-    blt t6, t5, 3f # verifica se digito for maior que 9
+    blt t6, a0, 3f # verifica se digito for maior que 9
     jalr x0, ra, 0 # se nao, volta pra adicionar 48
 
 3:
-    addi t5, t5, 55 # adiciona 55 (pra letras maiusculas)
+    addi a0, a0, 55 # adiciona 55 (pra letras maiusculas)
     jalr x0, ra, 4 # retorna pra instrucao seguinte a adicionar 48
 
 4:
@@ -123,25 +127,25 @@ adicao:
 
 
 gets:
-    mv t0, a0 # copia endereco inicial da string
     mv a1, a0 # str em a1
-    li t1, 10 # '\n'
-
-1:
     li a0, 0 # fd = 0
-    li a2, 1 # le byte por byte
+    li a2, 100 # numero maximo de bytes
     li a7, 63 # syscall read 
     ecall 
 
-    lb t2, 0(a1)
-    beq t2, t1, 2f # se digito atual = \n, pula pro fim
-    addi a1, a1, 1
-    j 1b
+    add t0, a1, a0 # chega na ultima posicao da string
+    beq x0, a0, 1f # se bytes lidos = 0, pula
 
-2:
-    sb x0, 0(a1) # '\0' no final da string
+    li t1, 10 # '\n'
+    addi t0, t0, -1
+    lb t2, 0(t0) # caractere final
+    beq t1, t2, 1f # caso caractere final seja \n, pula
+    addi t0, t0, 1
 
-    mv a0, t0
+1:
+    sb x0, 0(t0) # '\0' no final da string
+
+    mv a0, a1
 
     ret
 
@@ -158,6 +162,7 @@ contagem:
     j contagem
 
 1:
+
     li t2, 10 # '\n'
     sb t2, 0(t1) # salva \n no final da string
     mv a1, a0 # str em a1
