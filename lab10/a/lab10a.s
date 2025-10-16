@@ -1,6 +1,3 @@
-.bss
-buf: .skip 100
-
 .text
 .globl linked_list_search
 .globl puts
@@ -85,7 +82,16 @@ itoa:
     li t3, 1 # divisor inicial
     li t4, 0 # contagem de digitos
 
-1: # do-while
+    blt t0, x0, neg # se valor = -1 
+    j 1f
+
+neg:
+    li t0, 1 # valor absoluto
+    li t5, 45 # '-'
+    sb t5, 0(t1)
+    addi t1, t1, 1 # pula o '-' armazenado na posicao inicial
+
+1: 
     mul t3, t3, t2 # se nao, divisor inicial aumenta
     addi t4, t4, 1
 
@@ -103,7 +109,7 @@ itoa:
     addi t1, t1, 1 # anda no buffer
     addi t4, t4, -1 # i--
     blt x0, t4, 2b # t4 > 0
-    sb x0, 0(t0) # '\0' no final
+    sb x0, 0(t1) # '\0' no final
     j 4f
 
 adicao:
@@ -165,7 +171,6 @@ contagem:
     mv a2, t0 # qntd de bytes escritos
     li a7, 64 # syscall write
     ecall
-
     ret
 
 
