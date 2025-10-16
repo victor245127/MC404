@@ -23,7 +23,7 @@ linked_list_search:
     add t6, t3, t4 # soma
     beq a1, t6, 3f # se input = soma, retorna o indice
 
-    mv t0, t5 # anda para proximo no
+    addi t0, t0, 8 # anda para proximo no
     addi a0, a0, 1 # prox indice
 
     beq t0, x0, 2f # caso proximo no seja 0 e nao tiver achado a soma, retorna -1
@@ -40,9 +40,6 @@ linked_list_search:
 
 
 atoi:
-    addi sp, sp, -16
-    sw ra, 0(sp)
-
     mv t6, a0 # str em t6
     li a0, 0
     li t4, 10 
@@ -69,8 +66,6 @@ atoi:
 
 3:
     mul a0, a0, t3 # multiplica por +/-1 dependendo do sinal
-    lw ra, 0(sp)
-    addi sp, sp, 16
     ret
 
 
@@ -108,7 +103,7 @@ itoa:
 
 adicao:
     li t6, 9
-    blt t6, a0, 4f # verifica se digito for maior que 9
+    blt t6, a0, 3f # verifica se digito for maior que 9
     jalr x0, ra, 0 # se nao, volta pra adicionar 48
 
 3:
@@ -123,9 +118,6 @@ adicao:
 
 
 gets:
-    addi sp, sp, -16
-    sw ra, 0(sp)
-
     mv a1, a0 # str em a1
     li a0, 0 # fd = 0
     li a2, 100 # numero maximo de bytes
@@ -146,15 +138,10 @@ gets:
 
     mv a0, a1
 
-    lw ra, 0(sp)
-    addi sp, sp, 16
     ret
 
 
 puts:
-    addi sp, sp, -16
-    sw ra, 0(sp)
-
     li t0, 1
     mv t1, a0 # str em t1
 
@@ -175,8 +162,6 @@ contagem:
     li a7, 64 # syscall write
     ecall
 
-    lw ra, 0(sp)
-    addi sp, sp, 16
     ret
 
 
